@@ -89,7 +89,7 @@ export async function getMediaList(
   context: DbContext,
   data: GetMediaListInput,
 ) {
-  return ok(await MediaRepo.getMediaList(context.db, data));
+  return await MediaRepo.getMediaList(context.db, data);
 }
 
 export async function isMediaInUse(context: DbContext, key: string) {
@@ -97,25 +97,25 @@ export async function isMediaInUse(context: DbContext, key: string) {
 }
 
 export async function getLinkedPosts(context: DbContext, key: string) {
-  return ok(await PostMediaRepo.getPostsByMediaKey(context.db, key));
+  return await PostMediaRepo.getPostsByMediaKey(context.db, key);
 }
 
 export async function getLinkedMediaKeys(
   context: DbContext,
   keys: Array<string>,
 ) {
-  return ok(await PostMediaRepo.getLinkedMediaKeys(context.db, keys));
+  return await PostMediaRepo.getLinkedMediaKeys(context.db, keys);
 }
 
 export async function getTotalMediaSize(context: DbContext) {
-  return ok(await MediaRepo.getTotalMediaSize(context.db));
+  return await MediaRepo.getTotalMediaSize(context.db);
 }
 
 export async function updateMediaName(
   context: DbContext,
   data: UpdateMediaNameInput,
 ) {
-  return ok(await MediaRepo.updateMediaName(context.db, data.key, data.name));
+  return await MediaRepo.updateMediaName(context.db, data.key, data.name);
 }
 
 export async function handleImageRequest(

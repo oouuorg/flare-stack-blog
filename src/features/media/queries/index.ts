@@ -26,29 +26,14 @@ export function mediaInfiniteQueryOptions(
 ) {
   return infiniteQueryOptions({
     queryKey: MEDIA_KEYS.list(search, unusedOnly),
-    queryFn: async ({ pageParam }) => {
-      const result = await getMediaFn({
+    queryFn: ({ pageParam }) =>
+      getMediaFn({
         data: {
           cursor: pageParam,
           search: search || undefined,
           unusedOnly: unusedOnly || undefined,
         },
-      });
-      if (result.error) {
-        const reason = result.error.reason;
-        switch (reason) {
-          case "UNAUTHENTICATED":
-            throw new Error("登录状态已失效，请重新登录");
-          case "PERMISSION_DENIED":
-            throw new Error("权限不足，仅管理员可访问媒体库");
-          default: {
-            reason satisfies never;
-            throw new Error("获取媒体列表失败");
-          }
-        }
-      }
-      return result.data;
-    },
+      }),
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     initialPageParam: undefined as number | undefined,
   });
@@ -59,44 +44,12 @@ export function linkedMediaKeysQuery(keys: Array<string>) {
   const joinedKeys = keys.join("|");
   return queryOptions({
     queryKey: MEDIA_KEYS.linkedKeys(joinedKeys),
-    queryFn: async () => {
-      const result = await getLinkedMediaKeysFn({ data: { keys } });
-      if (result.error) {
-        const reason = result.error.reason;
-        switch (reason) {
-          case "UNAUTHENTICATED":
-            throw new Error("登录状态已失效，请重新登录");
-          case "PERMISSION_DENIED":
-            throw new Error("权限不足，仅管理员可访问媒体关联信息");
-          default: {
-            reason satisfies never;
-            throw new Error("获取媒体关联信息失败");
-          }
-        }
-      }
-      return result.data;
-    },
+    queryFn: () => getLinkedMediaKeysFn({ data: { keys } }),
     staleTime: 30000,
   });
 }
 
 export const totalMediaSizeQuery = queryOptions({
   queryKey: MEDIA_KEYS.totalSize,
-  queryFn: async () => {
-    const result = await getTotalMediaSizeFn();
-    if (result.error) {
-      const reason = result.error.reason;
-      switch (reason) {
-        case "UNAUTHENTICATED":
-          throw new Error("登录状态已失效，请重新登录");
-        case "PERMISSION_DENIED":
-          throw new Error("权限不足，仅管理员可访问媒体统计");
-        default: {
-          reason satisfies never;
-          throw new Error("获取媒体统计失败");
-        }
-      }
-    }
-    return result.data;
-  },
+  queryFn: () => getTotalMediaSizeFn(),
 });

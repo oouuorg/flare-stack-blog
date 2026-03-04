@@ -6,113 +6,60 @@ import {
   UploadMediaInputSchema,
 } from "@/features/media/media.schema";
 import * as MediaService from "@/features/media/media.service";
-import { err } from "@/lib/errors";
-import { hasSession, sessionMiddleware } from "@/lib/middlewares";
+import { adminMiddleware } from "@/lib/middlewares";
 
 export const uploadImageFn = createServerFn({
   method: "POST",
 })
-  .middleware([sessionMiddleware])
+  .middleware([adminMiddleware])
   .inputValidator(UploadMediaInputSchema)
-  .handler(({ data: file, context }) => {
-    if (!hasSession(context)) {
-      return err({ reason: "UNAUTHENTICATED" });
-    }
-    if (context.session.user.role !== "admin") {
-      return err({ reason: "PERMISSION_DENIED" });
-    }
-    return MediaService.upload(context, file);
-  });
+  .handler(({ data: file, context }) => MediaService.upload(context, file));
 
 export const deleteImageFn = createServerFn({
   method: "POST",
 })
-  .middleware([sessionMiddleware])
+  .middleware([adminMiddleware])
   .inputValidator(
     z.object({
       key: z.string().min(1, "Image key is required"),
     }),
   )
-  .handler(({ data, context }) => {
-    if (!hasSession(context)) {
-      return err({ reason: "UNAUTHENTICATED" });
-    }
-    if (context.session.user.role !== "admin") {
-      return err({ reason: "PERMISSION_DENIED" });
-    }
-    return MediaService.deleteImage(context, data.key);
-  });
+  .handler(({ data, context }) => MediaService.deleteImage(context, data.key));
 
 export const getMediaFn = createServerFn()
-  .middleware([sessionMiddleware])
+  .middleware([adminMiddleware])
   .inputValidator(GetMediaListInputSchema)
-  .handler(({ data, context }) => {
-    if (!hasSession(context)) {
-      return err({ reason: "UNAUTHENTICATED" });
-    }
-    if (context.session.user.role !== "admin") {
-      return err({ reason: "PERMISSION_DENIED" });
-    }
-    return MediaService.getMediaList(context, data);
-  });
+  .handler(({ data, context }) => MediaService.getMediaList(context, data));
 
 export const getLinkedPostsFn = createServerFn()
-  .middleware([sessionMiddleware])
+  .middleware([adminMiddleware])
   .inputValidator(
     z.object({
       key: z.string().min(1, "Image key is required"),
     }),
   )
-  .handler(({ data, context }) => {
-    if (!hasSession(context)) {
-      return err({ reason: "UNAUTHENTICATED" });
-    }
-    if (context.session.user.role !== "admin") {
-      return err({ reason: "PERMISSION_DENIED" });
-    }
-    return MediaService.getLinkedPosts(context, data.key);
-  });
+  .handler(({ data, context }) =>
+    MediaService.getLinkedPosts(context, data.key),
+  );
 
 export const getLinkedMediaKeysFn = createServerFn()
-  .middleware([sessionMiddleware])
+  .middleware([adminMiddleware])
   .inputValidator(
     z.object({
       keys: z.array(z.string()),
     }),
   )
-  .handler(({ data, context }) => {
-    if (!hasSession(context)) {
-      return err({ reason: "UNAUTHENTICATED" });
-    }
-    if (context.session.user.role !== "admin") {
-      return err({ reason: "PERMISSION_DENIED" });
-    }
-    return MediaService.getLinkedMediaKeys(context, data.keys);
-  });
+  .handler(({ data, context }) =>
+    MediaService.getLinkedMediaKeys(context, data.keys),
+  );
 
 export const getTotalMediaSizeFn = createServerFn()
-  .middleware([sessionMiddleware])
-  .handler(({ context }) => {
-    if (!hasSession(context)) {
-      return err({ reason: "UNAUTHENTICATED" });
-    }
-    if (context.session.user.role !== "admin") {
-      return err({ reason: "PERMISSION_DENIED" });
-    }
-    return MediaService.getTotalMediaSize(context);
-  });
+  .middleware([adminMiddleware])
+  .handler(({ context }) => MediaService.getTotalMediaSize(context));
 
 export const updateMediaNameFn = createServerFn({
   method: "POST",
 })
-  .middleware([sessionMiddleware])
+  .middleware([adminMiddleware])
   .inputValidator(UpdateMediaNameInputSchema)
-  .handler(({ data, context }) => {
-    if (!hasSession(context)) {
-      return err({ reason: "UNAUTHENTICATED" });
-    }
-    if (context.session.user.role !== "admin") {
-      return err({ reason: "PERMISSION_DENIED" });
-    }
-    return MediaService.updateMediaName(context, data);
-  });
+  .handler(({ data, context }) => MediaService.updateMediaName(context, data));

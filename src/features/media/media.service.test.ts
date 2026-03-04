@@ -69,9 +69,7 @@ describe("MediaService", () => {
       expect(Storage.putToR2).toHaveBeenCalledWith(adminContext.env, file);
 
       // Verify DB record was created
-      const mediaList = unwrap(
-        await MediaService.getMediaList(adminContext, {}),
-      );
+      const mediaList = await MediaService.getMediaList(adminContext, {});
       expect(mediaList.items.some((m) => m.key === result.key)).toBeTruthy();
     });
 
@@ -144,9 +142,7 @@ describe("MediaService", () => {
       await waitForBackgroundTasks(adminContext.executionCtx);
 
       // Verify DB record is gone
-      const mediaList = unwrap(
-        await MediaService.getMediaList(adminContext, {}),
-      );
+      const mediaList = await MediaService.getMediaList(adminContext, {});
       expect(
         mediaList.items.find((m) => m.key === uploaded.key),
       ).toBeUndefined();
@@ -174,28 +170,22 @@ describe("MediaService", () => {
     });
 
     it("should list media with pagination", async () => {
-      const result = unwrap(
-        await MediaService.getMediaList(adminContext, {
-          limit: 3,
-        }),
-      );
+      const result = await MediaService.getMediaList(adminContext, {
+        limit: 3,
+      });
 
       expect(result.items).toHaveLength(3);
       expect(result.nextCursor).not.toBeNull();
     });
 
     it("should fetch next page using cursor", async () => {
-      const firstPage = unwrap(
-        await MediaService.getMediaList(adminContext, {
-          limit: 3,
-        }),
-      );
-      const secondPage = unwrap(
-        await MediaService.getMediaList(adminContext, {
-          limit: 3,
-          cursor: firstPage.nextCursor!,
-        }),
-      );
+      const firstPage = await MediaService.getMediaList(adminContext, {
+        limit: 3,
+      });
+      const secondPage = await MediaService.getMediaList(adminContext, {
+        limit: 3,
+        cursor: firstPage.nextCursor!,
+      });
 
       expect(secondPage.items).toHaveLength(2); // 5 total, 3 in first page
       expect(secondPage.nextCursor).toBeNull();
@@ -213,20 +203,16 @@ describe("MediaService", () => {
       });
       unwrap(await MediaService.upload(adminContext, { file: uniqueFile }));
 
-      const result = unwrap(
-        await MediaService.getMediaList(adminContext, {
-          search: "special-unique",
-        }),
-      );
+      const result = await MediaService.getMediaList(adminContext, {
+        search: "special-unique",
+      });
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0].fileName).toBe("special-unique-file.png");
     });
 
     it("should calculate total media size", async () => {
-      const totalSize = unwrap(
-        await MediaService.getTotalMediaSize(adminContext),
-      );
+      const totalSize = await MediaService.getTotalMediaSize(adminContext);
 
       // 5 files with "content X" = roughly 9 bytes each
       expect(totalSize).toBeGreaterThan(0);
@@ -240,18 +226,14 @@ describe("MediaService", () => {
         await MediaService.upload(adminContext, { file }),
       );
 
-      unwrap(
-        await MediaService.updateMediaName(adminContext, {
-          key: uploaded.key,
-          name: "new-fancy-name.png",
-        }),
-      );
+      await MediaService.updateMediaName(adminContext, {
+        key: uploaded.key,
+        name: "new-fancy-name.png",
+      });
 
-      const list = unwrap(
-        await MediaService.getMediaList(adminContext, {
-          search: "new-fancy-name",
-        }),
-      );
+      const list = await MediaService.getMediaList(adminContext, {
+        search: "new-fancy-name",
+      });
       expect(list.items).toHaveLength(1);
     });
   });
@@ -286,8 +268,9 @@ describe("MediaService", () => {
       expect(isInUse).toBe(true);
 
       // Get linked posts
-      const linkedPosts = unwrap(
-        await MediaService.getLinkedPosts(adminContext, media.key),
+      const linkedPosts = await MediaService.getLinkedPosts(
+        adminContext,
+        media.key,
       );
       expect(linkedPosts).toHaveLength(1);
     });
@@ -324,8 +307,9 @@ describe("MediaService", () => {
       });
 
       // Batch check
-      const linkedKeys = unwrap(
-        await MediaService.getLinkedMediaKeys(adminContext, mediaKeys),
+      const linkedKeys = await MediaService.getLinkedMediaKeys(
+        adminContext,
+        mediaKeys,
       );
 
       expect(linkedKeys).toHaveLength(2);
